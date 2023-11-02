@@ -1,0 +1,5 @@
+package clases;
+
+public enum MarcaBarco {
+	HALLBERGRASSY,LURSSEN,MARINELLO,NAUTIRAID,NITRO,YAMAHA
+}
