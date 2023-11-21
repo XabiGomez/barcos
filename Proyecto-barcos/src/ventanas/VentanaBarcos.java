@@ -34,7 +34,7 @@ import clases.TipoBarco;
 
 public class VentanaBarcos extends JFrame {
 	private static final long serialVersionUID = 1L;
-	static List<Barco> barcos;
+	public static List<Barco> barcos;
 	private DefaultTableModel modelo;
 	private JTable tabla;
 	private JToolBar botonesSup;
@@ -128,7 +128,13 @@ public class VentanaBarcos extends JFrame {
 	private void initTabla() {
 
 		Vector<String> cabeceras = new Vector<String>(Arrays.asList( "ID", "TIPO", "MARCA", "MODELO","PRECIO"));
-		modelo = new DefaultTableModel(new Vector<Vector<Object>>(), cabeceras);
+		modelo = new DefaultTableModel(new Vector<Vector<Object>>(), cabeceras) {
+			   @Override
+		        public boolean isCellEditable(int row, int column) {
+		            return false;
+		        }
+		    };
+		
 		tabla = new JTable(modelo);
 		tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	}

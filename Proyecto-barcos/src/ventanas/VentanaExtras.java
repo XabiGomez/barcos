@@ -37,7 +37,7 @@ public class VentanaExtras extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JToolBar barra;
 	private JToolBar barraAbajo;
-	static List<Extras> extras;
+	public static List<Extras> extras;
 	private JTable tablaExtras;
 	private DefaultTableModel modeloDatosExtras;
 
@@ -137,7 +137,12 @@ public class VentanaExtras extends JFrame {
 	private void iniciarTabla() {
 
 		Vector<String> cabeceraExtras = new Vector<String>(Arrays.asList("ID", "Tipo", "Compra", "Venta"));
-		this.modeloDatosExtras = new DefaultTableModel(new Vector<Vector<Object>>(), cabeceraExtras);
+		this.modeloDatosExtras = new DefaultTableModel(new Vector<Vector<Object>>(), cabeceraExtras) {
+		   @Override
+	        public boolean isCellEditable(int row, int column) {
+	            return false; 
+	        }
+	    };
 		this.tablaExtras = new JTable(this.modeloDatosExtras);
 		this.tablaExtras.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
