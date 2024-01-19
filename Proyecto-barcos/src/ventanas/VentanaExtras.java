@@ -1,8 +1,11 @@
 package ventanas;
 
 import java.awt.BorderLayout;
+
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -11,15 +14,19 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -29,8 +36,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
+
 import clases.Extras;
 import clases.TipoExtras;
+import db.DB;
 
 
 public class VentanaExtras extends JFrame {
@@ -40,13 +49,14 @@ public class VentanaExtras extends JFrame {
 	public static List<Extras> extras;
 	private JTable tablaExtras;
 	private DefaultTableModel modeloDatosExtras;
+	private static VentanaRegistro vr = new VentanaRegistro();
 
 	int mouseRow = -1;
 	int mouseCol = -1;
 	
 	
 	public VentanaExtras() {
-		
+		DB db = new DB();
 		extras = new ArrayList<Extras>();		
 		
 		leerCSV();
@@ -76,9 +86,20 @@ public class VentanaExtras extends JFrame {
 		JButton atras = new JButton("Atras");
 		JButton comprar = new JButton("Comprar");
 		JButton vender = new JButton("Vender");
+		JButton bCesta = new JButton(new ImageIcon(getScaledImage(new ImageIcon("img/cesta.png").getImage(), 30, 30)));
+        bCesta.setPreferredSize(new Dimension(30, 30));
+        bCesta.addActionListener(e -> {
+        	VentanaCesta vc = new VentanaCesta();
+			vc.setLocationRelativeTo(null);
+			vc.setVisible( true );
+			vc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			vc.setResizable(false);
+			dispose();	
+        });
 		
 		barra.add(comprar);
 		barra.add(vender);
+		barra.add(bCesta);
 		barraAbajo.add(atras);
 	
 		panelSup.add(barra, BorderLayout.NORTH);
@@ -86,22 +107,24 @@ public class VentanaExtras extends JFrame {
 		panelSup.add(scrollPaneRepuestos, BorderLayout.CENTER);
 		
 		TableCellRenderer renderMouseOver = (table, value, isSelected, hasFocus, row, column) -> {
-			JLabel label = new JLabel(value.toString());
-			
-			if (row == this.mouseRow && column == this.mouseCol) {
-				label.setBackground(Color.YELLOW);
-			} else {
-				label.setBackground(table.getBackground());
-			}
-			
-			if (isSelected) {
-				label.setBackground(table.getSelectionBackground());
-				label.setForeground(table.getSelectionForeground());
-			}
-			
-			label.setOpaque(true);
-				
-			return label;
+			 JPanel panel = new JPanel(new BorderLayout());
+			 JLabel label = new JLabel(value.toString());
+
+			    if (row == this.mouseRow) {
+			        panel.setBackground(Color.YELLOW);
+			    } else {
+			        panel.setBackground(table.getBackground());
+			    }
+
+			    if (isSelected) {
+			        panel.setBackground(table.getSelectionBackground());
+			        panel.setForeground(table.getSelectionForeground());
+			    }
+
+			    panel.setOpaque(true);
+			    panel.add(label, BorderLayout.CENTER);
+
+			    return panel;
 		};
 		
 		this.tablaExtras.setDefaultRenderer(Object.class, renderMouseOver);
@@ -111,11 +134,44 @@ public class VentanaExtras extends JFrame {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				mouseRow = tablaExtras.rowAtPoint(e.getPoint());
-				mouseCol = tablaExtras.columnAtPoint(e.getPoint());
 
-				if (mouseRow > -1 && mouseCol >-1) {
+				if (mouseRow > -1) {
 					tablaExtras.repaint();
 				}
+			}
+		});
+		
+		comprar.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (tablaExtras.getSelectedRow() >= 0) {
+					if (vr.usuarioRegistrado.getDinero() >= extras.get(tablaExtras.getSelectedRow()).getCompra()) {
+						String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+						db.guardarDBCompra("usuario.db", vr.usuarioRegistrado, extras.get(tablaExtras.getSelectedRow()).getId(), extras.get(tablaExtras.getSelectedRow()).getCompra(), date);
+						vr.usuarioRegistrado.setDinero(vr.usuarioRegistrado.getDinero()-extras.get(tablaExtras.getSelectedRow()).getCompra());
+						JOptionPane.showMessageDialog(null, "Compra añadida correctamente a tu inventario.");
+						} else {
+						JOptionPane.showMessageDialog(null, "No tienes suficiente dinero para realizar esta compra");
+					}
+				}
+
+				
+			}
+		});
+		
+		vender.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (tablaExtras.getSelectedRow() >= 0) {
+					String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+					db.guardarDBCompra("usuario.db", vr.usuarioRegistrado, extras.get(tablaExtras.getSelectedRow()).getId(), extras.get(tablaExtras.getSelectedRow()).getVenta(), date);
+					vr.usuarioRegistrado.setDinero(vr.usuarioRegistrado.getDinero()+extras.get(tablaExtras.getSelectedRow()).getVenta());
+					JOptionPane.showMessageDialog(null, "Venta realizada");
+				}
+
+				
 			}
 		});
 
@@ -131,6 +187,22 @@ public class VentanaExtras extends JFrame {
 				
 			}
 		});
+		
+		JButton btnPosiblesCompras = new JButton("Posibles compras");
+		barraAbajo.add(btnPosiblesCompras);
+		btnPosiblesCompras.addActionListener( new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String resp = JOptionPane.showInputDialog(null, "¿Cuanto dinero quieres gastarte?:");
+					if (resp==null) return;
+					int dinero = Integer.parseInt( resp );
+					calcularComprasPosibles( dinero );
+				} catch (NumberFormatException e2) {
+					JOptionPane.showMessageDialog(null, "Por favor, introduce un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});	
 	}
 		
 
@@ -183,6 +255,29 @@ public class VentanaExtras extends JFrame {
 			e.printStackTrace();
 		}
 	}
+	
+	private void calcularComprasPosibles(int disponible) {
+		ArrayList<Extras> lExtras = new ArrayList<>();
+		calcularComprasPosibles(extras, disponible, lExtras);
+	}
+	private void calcularComprasPosibles(List<Extras> listExtras, int restante, ArrayList<Extras> lComprado) {
+		if (restante < 0) return;
+		else if (restante < 50) {
+			String mensaje = "Posible compra (sobran " + String.format("%d", restante) + " euros): " + lComprado;
+		    JOptionPane.showMessageDialog(null, mensaje, "Posibles Compras", JOptionPane.INFORMATION_MESSAGE);
+		}
+		else {
+			for (Extras e : listExtras) {
+				lComprado.add(e);
+				calcularComprasPosibles(listExtras, restante - e.getCompra(), lComprado);
+				lComprado.remove(lComprado.size()-1);
+			}
+		}
+	}
+	
+	private Image getScaledImage(Image srcImg, int width, int height) {
+        return srcImg.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    }
 	
 
 }

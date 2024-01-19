@@ -50,10 +50,10 @@ public class VentanaAjustes extends JFrame{
 		bPerfil.setBounds(150, 180, 200, 37);
 		panelCentral.add(bPerfil);
 		
-		JButton btnCerrarSesion = new JButton("Cerrar sesion");
-		btnCerrarSesion.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		btnCerrarSesion.setBounds(150, 260, 200, 37);
-		panelCentral.add(btnCerrarSesion);
+		JButton bCerrarSesion = new JButton("Cerrar sesion");
+		bCerrarSesion.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		bCerrarSesion.setBounds(150, 260, 200, 37);
+		panelCentral.add(bCerrarSesion);
 		
 		atras.addActionListener(new ActionListener() {
 			
@@ -74,7 +74,19 @@ public class VentanaAjustes extends JFrame{
 					}
 				});
 		
-		btnCerrarSesion.addActionListener(new ActionListener() {
+		bPerfil.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				VentanaCuenta vc = new VentanaCuenta();
+				vc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				vc.setLocationRelativeTo(null);
+				vc.setVisible(true);
+				dispose();
+			}
+		});
+		
+		bCerrarSesion.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -85,6 +97,8 @@ public class VentanaAjustes extends JFrame{
 				dispose();
 			}
 		});
+		
+		
 	}
 }
 

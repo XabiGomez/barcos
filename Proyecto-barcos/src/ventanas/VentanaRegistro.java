@@ -4,21 +4,33 @@ import java.awt.BorderLayout;
 
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-//Todavia no es funcional hasta que no este implementado la bsa de datos de usuarios
+import clases.Usuario;
+import db.DB;
+
 
 public class VentanaRegistro extends JFrame{
 	private static final long serialVersionUID = 1L;
+	public static Usuario usuarioRegistrado;
+	private static VentanaRegistro vent = new VentanaRegistro();
+	private VentanaPrincipal ventanaPrincipal;
 
 	public VentanaRegistro() {
+		DB db = new DB();
+		db.init("usuario.db"); 
 		setSize(500, 600);
 		this.setTitle("The Boat Shop");
 		
@@ -68,5 +80,88 @@ public class VentanaRegistro extends JFrame{
 		registrar.setFont(new Font("Tahoma", Font.PLAIN, 17));
 		registrar.setBounds(150, 450, 200, 37);
 		panelCentral.add(registrar);
+		
+		iniciarSesion.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean saltaError = true;
+				ArrayList<Usuario> listau = db.sacarUsuarios("usuario.db");
+				if (textoNombre.getText().isBlank() || textoContrasena.getText().isBlank()) {
+					JOptionPane.showMessageDialog(null, "Por favor ingrese sus credenciales", "Iniciar sesion - Error",
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					for (Usuario u : listau) {
+						if (u.getNombre().equals(textoNombre.getText())
+								&& u.getContrasena().equals(textoContrasena.getText())) {
+							saltaError = false;
+							vent.setVisible(false);
+							usuarioRegistrado = u;
+							 if (ventanaPrincipal == null) {
+			                        ventanaPrincipal = new VentanaPrincipal();
+			                        ventanaPrincipal.setLocationRelativeTo(null);
+			                        ventanaPrincipal.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			                        ventanaPrincipal.setResizable(false);
+			                    }
+
+			                    ventanaPrincipal.setVisible(true);
+
+			                    vent.setVisible(false);
+			                    dispose();
+							
+						}	
+					}
+					if (saltaError == true) {
+					JOptionPane.showMessageDialog(null, "Las credenciales introducidas son erroneas", "Iniciar sesion - Error",
+							JOptionPane.INFORMATION_MESSAGE);	
+					}
+				}
+
+			}
+		});
+
+		registrar.addActionListener(new ActionListener() {
+
+			@SuppressWarnings("unlikely-arg-type")
+			@Override
+			public void actionPerformed(ActionEvent hg) {
+				ArrayList<Usuario> listau = db.sacarUsuarios("usuario.db");
+				String nombreUsuario = textoNombre.getText();
+				
+				if (nombreUsuario.isBlank() || textoContrasena.getText().isBlank()) {
+					JOptionPane.showMessageDialog(null,
+							"Por favor ponga el nombre de usuario que desea crear y/o su contraseña",
+							"Crear usuario nuevo - Error", JOptionPane.INFORMATION_MESSAGE);
+				} else if (existeUsuario(listau, nombreUsuario)) {
+					JOptionPane.showMessageDialog(null, "Este usuario ya existe", "Crear usuario nuevo - Error",
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					int opcion = JOptionPane.showConfirmDialog(null,
+							"�Estas seguro de que quieres crear un usuario con nombre: " + nombreUsuario
+									+ " y contrase�a: " + textoContrasena.getText() + "?",
+							"Confirmar salida", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					if (opcion == 0) {
+						db.guardarUsuario("usuario.db", nombreUsuario, textoContrasena.getText(), 0);
+					}
+					if (opcion == 1) {
+
+					}
+
+				}
+
+			}
+			
+			private boolean existeUsuario(ArrayList<Usuario> listaUsuarios, String nombreUsuario) {
+		        for (Usuario usuario : listaUsuarios) {
+		            if (usuario.getNombre().equals(nombreUsuario)) {
+		                return true; 
+		            }
+		        }
+		        return false; 
+		    }
+		});
+	
+		
 	}
+	
 }

@@ -1,37 +1,70 @@
 package ventanas;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import javax.swing.border.EmptyBorder;
 
 public class VentanaPrincipal extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	private JPanel panelSup;
+	private JPanel panel;
+	private JPanel panelBotones;
 	private JToolBar barra;
 	
 	public VentanaPrincipal() {
 		setTitle("The Boat Shop");
 		setSize(500, 600);
 		setLocation(550, 150);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		panelSup = new JPanel();
-		panelSup.setLayout(new BorderLayout());
-		
-		barra = new JToolBar();
-		
-		JButton bAjustes = new JButton("Ajustes");
-		barra.add(bAjustes);
-		
-		
-		JButton bBar = new JButton("Barcos");
-		barra.add(bBar);
-		
+		panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		JButton bCesta = new JButton(new ImageIcon(getScaledImage(new ImageIcon("img/cesta.png").getImage(), 30, 30)));
+        bCesta.setPreferredSize(new Dimension(30, 30));
+        bCesta.addActionListener(e -> {
+        	VentanaCesta vc = new VentanaCesta();
+			vc.setLocationRelativeTo(null);
+			vc.setVisible( true );
+			vc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			vc.setResizable(false);
+			dispose();	
+        });
+
+        JButton bAjustes = new JButton("Ajustes");
+        JButton bBar = new JButton("Barcos");
+        JButton bExtras = new JButton("Extras");
+        JButton bRev = new JButton("Reviews");
+
+        panelBotones = new JPanel(new GridLayout(2, 2, 20, 20));
+        panelBotones.setBorder(new EmptyBorder(20, 20, 20, 20)); 
+        
+        panelBotones.add(bBar);
+        panelBotones.add(bExtras);
+        panelBotones.add(bRev);
+        panelBotones.add(bAjustes);
+        
+        barra = new JToolBar();
+        barra.add(bCesta);
+        
+        //JPanel panelEste = new JPanel(new BorderLayout());
+        //panelEste.add(barra, BorderLayout.NORTH);
+        
+        panel.add(barra, BorderLayout.NORTH);
+        panel.add(panelBotones, BorderLayout.CENTER);
+        panel.add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
+
+        add(panel);
 		bBar.addActionListener(new ActionListener() {
 
 			@Override
@@ -47,11 +80,7 @@ public class VentanaPrincipal extends JFrame {
 			
 		});
 		
-		JButton bExtras = new JButton("Extras");
-		barra.add(bExtras);
-		
-		panelSup.add(barra, BorderLayout.NORTH);
-		add(panelSup);
+	
 		
 		bExtras.addActionListener(new ActionListener() {
 
@@ -80,12 +109,7 @@ public class VentanaPrincipal extends JFrame {
 			}
 			
 		});
-		
-		JButton bRev = new JButton("Reviews");
-		barra.add(bRev);
-		
-		panelSup.add(barra, BorderLayout.NORTH);
-		add(panelSup);
+
 		
 		bRev.addActionListener(new ActionListener() {
 
@@ -101,6 +125,10 @@ public class VentanaPrincipal extends JFrame {
 			}
 		});
 	}
+	
+	private Image getScaledImage(Image srcImg, int width, int height) {
+        return srcImg.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    }
 	
 
 

@@ -8,8 +8,8 @@ public class Main {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					//VentanaRegistro vent = new VentanaRegistro();
-					VentanaPrincipal vent = new VentanaPrincipal();
+					VentanaRegistro vent = new VentanaRegistro();
+					//VentanaPrincipal vent = new VentanaPrincipal();
 					vent.setVisible(true);
 					vent.setLocation(550,150);
 				} catch (Exception e) {
